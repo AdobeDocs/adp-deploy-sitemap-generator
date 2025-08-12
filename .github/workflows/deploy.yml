@@ -29,12 +29,12 @@ jobs:
     if: needs.set-state.outputs.deploy_dev == 'true'
     steps:
       - name: check dev azure connection string
-        if: env.AIO_AZURE_PROD_CONNECTION_STRING == null
+        if: env.AIO_AZURE_DEV_CONNECTION_STRING == null
         run: |
-          echo "::error::Please set the Azure Blob Storage connection string as AIO_AZURE_PROD_CONNECTION_STRING in Github Secrets"
+          echo "::error::Please set the Azure Blob Storage connection string as AIO_AZURE_DEV_CONNECTION_STRING in Github Secrets"
           exit 1
         env:
-          AIO_AZURE_PROD_CONNECTION_STRING: ${{ secrets.AIO_AZURE_PROD_CONNECTION_STRING }}
+          AIO_AZURE_PROD_CONNECTION_STRING: ${{ secrets.AIO_AZURE_DEV_CONNECTION_STRING }}
 
   build-dev:
     defaults:
@@ -51,12 +51,12 @@ jobs:
         with:
           node-version: "16.15.0" # Current LTS version
       - name: Deploy
-        uses: AdobeDocs/adp-sitemap-generator@test-sitemap
+        uses: AdobeDocs/adp-sitemap-generator@main
         with:
           enabled-static-website: "true"
           source: "public"
           target: "/"
-          connection-string-non-main: ${{ secrets.AIO_AZURE_PROD_CONNECTION_STRING }}
+          connection-string-non-main: ${{ secrets.AIO_AZURE_DEV_CONNECTION_STRING }}
           connection-string-main: ${{ secrets.AZURE_DEV_CONNECTION_STRING }}
           remove-existing-files: "true"
           exclude-subfolder: ${{ needs.set-state.outputs.exclude_subfolder }}
@@ -90,7 +90,7 @@ jobs:
         with:
           node-version: "16.15.0" # Current LTS version
       - name: Deploy
-        uses: AdobeDocs/adp-sitemap-generator@test-sitemap
+        uses: AdobeDocs/adp-sitemap-generator@main
         with:
           enabled-static-website: "true"
           source: "public"
