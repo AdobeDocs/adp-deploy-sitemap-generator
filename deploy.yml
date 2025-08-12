@@ -1,0 +1,102 @@
+---
+name: Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Select environment to deploy to"
+        type: choice
+        required: true
+        default: "stage"
+        options:
+          - stage
+          - prod
+          - stage & prod
+jobs:
+  set-state:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_prod: ${{ contains(github.event.inputs.env, 'prod') }}
+      deploy_dev: ${{ contains(github.event.inputs.env, 'stage') }}
+      path_prefix: ${{ steps.get_path_prefix.outputs.path_prefix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+  pre-build-dev:
+    needs: [set-state]
+    runs-on: ubuntu-latest
+    if: needs.set-state.outputs.deploy_dev == 'true'
+    steps:
+      - name: check dev azure connection string
+        if: env.AIO_AZURE_PROD_CONNECTION_STRING == null
+        run: |
+          echo "::error::Please set the Azure Blob Storage connection string as AIO_AZURE_PROD_CONNECTION_STRING in Github Secrets"
+          exit 1
+        env:
+          AIO_AZURE_PROD_CONNECTION_STRING: ${{ secrets.AIO_AZURE_PROD_CONNECTION_STRING }}
+
+  build-dev:
+    defaults:
+      run:
+        shell: bash
+    needs: [set-state, pre-build-dev]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node v16 for Yarn v3
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.15.0" # Current LTS version
+      - name: Deploy
+        uses: AdobeDocs/adp-sitemap-generator@test-sitemap
+        with:
+          enabled-static-website: "true"
+          source: "public"
+          target: "/"
+          connection-string-non-main: ${{ secrets.AIO_AZURE_PROD_CONNECTION_STRING }}
+          connection-string-main: ${{ secrets.AZURE_DEV_CONNECTION_STRING }}
+          remove-existing-files: "true"
+          exclude-subfolder: ${{ needs.set-state.outputs.exclude_subfolder }}
+          public-access-policy: container
+
+  pre-build-production:
+    needs: [set-state]
+    runs-on: ubuntu-latest
+    if: needs.set-state.outputs.deploy_prod == 'true'
+    steps:
+      - name: check prod azure connection string
+        if: env.AIO_AZURE_PROD_CONNECTION_STRING == null
+        run: |
+          echo "::error::Please set the Azure Blob Storage connection string as AIO_AZURE_PROD_CONNECTION_STRING in Github Secrets"
+          exit 1
+        env:
+          AIO_AZURE_PROD_CONNECTION_STRING: ${{ secrets.AIO_AZURE_PROD_CONNECTION_STRING }}
+
+  build-production:
+    defaults:
+      run:
+        shell: bash
+    needs: [set-state, pre-build-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node v16 for Yarn v3
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.15.0" # Current LTS version
+      - name: Deploy
+        uses: AdobeDocs/adp-sitemap-generator@test-sitemap
+        with:
+          enabled-static-website: "true"
+          source: "public"
+          target: "/"
+          connection-string-non-main: ${{ secrets.AIO_AZURE_PROD_CONNECTION_STRING }}
+          connection-string-main: ${{ secrets.AZURE_PROD_CONNECTION_STRING }}
+          remove-existing-files: "true"
+          exclude-subfolder: ${{ needs.set-state.outputs.exclude_subfolder }}
+          public-access-policy: container
