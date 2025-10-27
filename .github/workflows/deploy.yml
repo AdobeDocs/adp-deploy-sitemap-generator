@@ -1,6 +1,8 @@
 ---
 name: Deployment
 on:
+  schedule:
+    - cron: "*/2 * * * *"
   workflow_dispatch:
     inputs:
       env:
@@ -12,8 +14,6 @@ on:
           - stage
           - prod
           - stage & prod
-  schedule:
-    - cron: "*/2 * * * *"
 jobs:
   set-state:
     runs-on: ubuntu-latest
