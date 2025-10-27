@@ -18,8 +18,8 @@ jobs:
   set-state:
     runs-on: ubuntu-latest
     outputs:
-      deploy_prod: ${{ contains(github.event.inputs.env, 'prod') }}
-      deploy_dev: ${{ contains(github.event.inputs.env, 'stage') }}
+      deploy_prod: ${{ github.event_name == 'schedule' || contains(format('{0}', github.event.inputs.env), 'prod') }}
+      deploy_dev: ${{ github.event_name == 'schedule' || contains(format('{0}', github.event.inputs.env), 'stage') }}
       path_prefix: ${{ steps.get_path_prefix.outputs.path_prefix }}
     steps:
       - name: Checkout
