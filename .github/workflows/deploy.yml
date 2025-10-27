@@ -2,14 +2,14 @@
 name: Deployment
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 5 * * *"
   workflow_dispatch:
     inputs:
       env:
         description: "Select environment to deploy to"
         type: choice
         required: false
-        default: "stage"
+        default: "stage & prod"
         options:
           - stage
           - prod
