@@ -1,0 +1,26 @@
+---
+name: Deploy robots.txt
+on:
+  workflow_dispatch:
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout adp-sitemap-generator
+        uses: actions/checkout@v3
+        with:
+          repository: AdobeDocs/adp-sitemap-generator
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Upload robots.txt
+        run: node robots.js
+        env:
+          INPUT_CONNECTION-STRING-MAIN: ${{ secrets.AZURE_PROD_CONNECTION_STRING }}
