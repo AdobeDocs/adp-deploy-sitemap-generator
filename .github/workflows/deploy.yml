@@ -23,7 +23,7 @@ jobs:
       path_prefix: ${{ steps.get_path_prefix.outputs.path_prefix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
   pre-build-dev:
     needs: [set-state]
@@ -46,12 +46,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
-      - name: Setup Node v16 for Yarn v3
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: "16.15.0" # Current LTS version
+          node-version: "lts/krypton"
       - name: Deploy
         uses: AdobeDocs/adp-sitemap-generator@main
         with:
@@ -86,12 +86,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
-      - name: Setup Node v16 for Yarn v3
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: "16.15.0" # Current LTS version
+          node-version: "lts/krypton"
       - name: Deploy
         uses: AdobeDocs/adp-sitemap-generator@main
         with:
